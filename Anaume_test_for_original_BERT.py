@@ -38,16 +38,21 @@ fill_mask = pipeline(
 MASK_TOKEN = tokenizer.mask_token
 
 text = '''
-内夫が児童を暴行していたため、江戸川区の{}が一時保護した。
+休職期間満了まで後２ヶ月ほど。原職{}が原則だが、本人の元いた部署は無くなっており、戻らせる場所が（地理的にも業務的にも）無く、会社としてはかなり困っている。
 '''.format(MASK_TOKEN)
+# text = '''
+# 内夫が児童を暴行していたため、江戸川区の{}が一時保護した。
+# '''.format(MASK_TOKEN)
 fill_mask(text)
 
 
+newmodel_dir = "D:/Okayama/bert_20240113/20240113_ver2_fukushoku_BERT/"
+
 from transformers import pipeline
-tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/Edogawa_BERT/tohoku+edotoken/tokenizer/")
+tokenizer = BertJapaneseTokenizer.from_pretrained(newmodel_dir + "/tokenizer/")
 # tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token")
 # tokenizer = AutoTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
-model = BertForMaskedLM.from_pretrained("D:/Edogawa/Edogawa_BERT/tohoku+edotoken/")
+model = BertForMaskedLM.from_pretrained(newmodel_dir)
 
 fill_mask = pipeline(
     "fill-mask",
@@ -58,6 +63,9 @@ fill_mask = pipeline(
 MASK_TOKEN = tokenizer.mask_token
 
 text = '''
-内夫が児童を暴行していたため、江戸川区の{}が一時保護した。
+休職期間満了まで後２ヶ月ほど。原職{}が原則だが、本人の元いた部署は無くなっており、戻らせる場所が（地理的にも業務的にも）無く、会社としてはかなり困っている。
 '''.format(MASK_TOKEN)
+# text = '''
+# 内夫が児童を暴行していたため、江戸川区の{}が一時保護した。
+# '''.format(MASK_TOKEN)
 fill_mask(text)
