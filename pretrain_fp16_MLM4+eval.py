@@ -18,9 +18,14 @@ D:\Edogawa\model_save\protection\token_edo_0319 "vocab_size": 33583　
 と学習後に比較する。
 
 2022年8月9日
-追加の経過記録を追加した、corpus.txt（合計291MB、これまでの約倍）で東北大BERTに追加学習
-epoch60に設定
-比較のためのepoch20は、手動で取得する必要あり。
+追加の経過記録を追加して作成した
+//EBP-NAS01/edogawa/Keikakiroku/corpus_edogawaAug2021&Jun2022.txt
+（合計291MB、これまでの約倍）で東北大BERTに追加学習
+D:\BERT\Edogawa_BERT\tohoku+edotoken\model0406\checkpoint-32225 0.824
+"vocab_size": 35081
+と比較するために、同じtokenizerを利用。
+
+epoch60に設定　比較のためのepoch20は、手動で取得する必要あり。
 save_steps=25から50に変更（ハードディスク利用率が高すぎるため）
 """
 
@@ -40,7 +45,8 @@ corpus_dir='//EBP-NAS01/edogawa/Keikakiroku/corpus_edogawaAug2021&Jun2022.txt'
 
 
 from transformers import AutoTokenizer, AutoModelForMaskedLM, AlbertTokenizer,BertJapaneseTokenizer
-tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token_edo_0408/")
+tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token_edo_0331")
+# 上は"vocab_size": 35080
 # tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token")
 # tokenizer = AutoTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
 
@@ -48,7 +54,7 @@ model = AutoModelForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole
 # リスタートの場合もここにモデルパスを渡す
 # model = AutoModelForMaskedLM.from_pretrained("D:/Edogawa/Edogawa_BERT/tohoku&edogawa0327/checkpoint-166500")
 
-text = "内夫に叩かれた本児は児童相談所に一時保護されたが、名前を言うことができない。"
+text = "内夫に叩かれた本児は児童相談所に一時保護されたが、名前を言うことができない。ライフラインは止められている。"
 print(tokenizer.tokenize(text))
                          
 from transformers import BertConfig
@@ -129,7 +135,7 @@ training_args = TrainingArguments(
     # num_train_epochs=20,
     per_device_train_batch_size=64,
     # per_device_train_batch_size=16,
-    save_steps=50,
+    save_steps=100,
     save_total_limit=500,
     prediction_loss_only=False,
     fp16=True,
@@ -169,4 +175,5 @@ trainer = Trainer(
 
 trainer.train() 
 trainer.save_model(drive_dir)
-# tokenizer.save_pretrained('D:/Edogawa/Edogawa_BERT/tohoku+edotoken/tokenizer/')
+
+tokenizer.save_pretrained(drive_dir+'tokenizer/')
