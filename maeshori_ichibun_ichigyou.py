@@ -6,42 +6,50 @@ Created on Tue Oct 26 21:00:15 2021
 """
 import pandas as pd
 import re
-from merging_csv_folder import merging_csv
-from maeshori_deleting_wrong_letters import data_cleaning
+# from merging_csv_folder import merging_csv
+# from maeshori_deleting_wrong_letters import data_cleaning
 import glob
 import codecs as cd
 
-folder_dir='D:/Okayama/corpus/'
+folder_paths=['//EBP-NAS01/edogawa/Keikakiroku/2021_8_Keikakiroku_Aug/',
+              '//EBP-NAS01/edogawa/Keikakiroku/2022_6_Keikakiroku_June/',#形式が異なる
+             '//EBP-NAS01/edogawa/Keikakiroku/2022_10_Keikakiroku_Oct/',
+             '//EBP-NAS01/edogawa/Keikakiroku/2023_8_Keikakiroku_Aug/']
+# folder_dir='D:/Okayama/corpus/'
 # folder_dir='//EBP-NAS01/edogawa/Keikakiroku/Keikakiroku_June2022/'
 # folder_dir='D:/Edogawa/Edogawa_BERT/keikakiroku/original12files/'
 
 
 def read_csv_as_str(file_path):
-    with cd.open(file_path , "r", "shift-jis", "ignore") as csv_file: # or "utf-8" "shift-jis"  
+    with cd.open(file_path , "r", "utf-8", "ignore") as csv_file: # or "utf-8" "shift-jis"  
         df_csv = pd.read_csv(csv_file) 
     # df_csv = pd.read_csv(file_path, dtype=str, header=0,index_col=None)
     return df_csv
 
-def merging_many_csv(folder_path):
-    file_paths = glob.glob(folder_path + '*.csv')
-    
+def merging_many_csv(folder_paths):
+    file_paths_ap=[]
+    for folder_path in folder_paths:       
+        file_paths = glob.glob(folder_path + '*.csv')
+        file_paths_ap = file_paths_ap + file_paths      
+            
     files =[]
-    for path in file_paths:
+    for path in file_paths_ap:
         # file = pd.read_csv(path, dtype=str, header=0,index_col=None)
         file = read_csv_as_str(path)
+        print(file.head())
+        file = file.loc[:,"内容"]
         files.append(file)
         
     df_merged = pd.concat(files, axis=0)
     df = df_merged.reset_index()
     return df
 
-
 #フォルダ内のCSVを読み込みすべて結合 txtでも読み込み可能
-df1=merging_many_csv(folder_dir)
+df1=merging_many_csv(folder_paths)
 # df1=pd.read_csv(folder_dir+'original12files/01.csv')
 
 
-df1=df1.loc[:,'message']
+df1=df1.loc[:,'内容']
 # print(df2.head())
 # print(df2.shape)
 
@@ -66,7 +74,7 @@ for s in df4:
   result.append(xx)
   
 
-with open(folder_dir+'corpus.txt', mode='w',encoding='utf-8-sig') as f:   
+with open('corpus.txt', mode='w',encoding='utf-8-sig') as f:   
     f.writelines(result)
     
 
