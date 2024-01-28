@@ -14,7 +14,8 @@ gptj@owner2@deep2
 from sentencepiece import SentencePieceTrainer
 import sentencepiece as spm
 
-drive_dir="D:/Okayama/"
+drive_dir="//EBP-NAS01/edogawa/Keikakiroku/"
+# drive_dir="D:/Okayama/"
 # drive_dir="D:/BERT/Edogawa_BERT/keikakiroku/"
 
 # 東北大モデルそのままのvocab=size 32000　のモデルパス
@@ -22,7 +23,7 @@ small_token_dir="D:/Edogawa/model_save/20231129 protection rehabilitation/protec
 
 # # vocab_sizeはエラーが出ない程度に大きいほうが熟語などが登録されるのでベター
 SentencePieceTrainer.Train(
-    '--input='+drive_dir+'corpus/corpus.txt, --train_extremely_large_corpus=true --model_prefix='+drive_dir+'edogawa_sp --character_coverage=0.9995 --vocab_size=20000 --pad_id=3 --add_dummy_prefix=False --max_sentence_length=256'
+    '--input='+drive_dir+'corpus_2021-2023.txt, --train_extremely_large_corpus=true --model_prefix='+drive_dir+'edogawa_sp --character_coverage=0.9995 --vocab_size=20000 --pad_id=3 --add_dummy_prefix=False --max_sentence_length=256'
     # '--input='+drive_dir+'corpus/corpus.txt, --train_extremely_large_corpus=true --model_prefix='+drive_dir+'souseki_sentencepiece --character_coverage=0.9995 --vocab_size=1201 --pad_id=3 --add_dummy_prefix=False --max_sentence_length=256'
 )
 
@@ -36,18 +37,19 @@ tokenizer = AlbertTokenizer.from_pretrained(drive_dir+'edogawa_sp.model', keep_a
 text = "児童相談所に本児は保護されたが、名前を言えない"
 print(tokenizer.tokenize(text))
 
-corpus = open(drive_dir+"corpus/corpus.txt", "r",encoding="utf-8_sig")
+corpus = open(drive_dir+"corpus_2021-2023.txt", "r",encoding="utf-8_sig")
 c = corpus.read()
 
 
-
-import neologdn
-c = neologdn.normalize(c)
+# 以下は前処理で行っている場合は行わなくてもOK（時間を要する）
+# import neologdn
+# c = neologdn.normalize(c)
 
 import unicodedata
-c1 = unicodedata.normalize("NFKC", c)
+c = unicodedata.normalize("NFKC", c)
 
-c_t = tokenizer.tokenize(c1)
+
+c_t = tokenizer.tokenize(c)
 
 
 words = c_t
@@ -148,8 +150,8 @@ from transformers import AlbertTokenizer,BertJapaneseTokenizer
 jtk_a = BertJapaneseTokenizer.from_pretrained(small_token_dir)
 # jtk_a = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token/")
 
-jp_text = "休職期間満了まで後２ヶ月ほど。原職復帰が原則だが、本人の元いた部署は無くなっており、戻らせる場所が（地理的にも業務的にも）無く、会社としてはかなり困っている。"
-# jp_text = "内夫に叩かれた児は児童相談所に一時保護されたが、名前を言えない"
+# jp_text = "休職期間満了まで後２ヶ月ほど。原職復帰が原則だが、本人の元いた部署は無くなっており、戻らせる場所が（地理的にも業務的にも）無く、会社としてはかなり困っている。"
+jp_text = "内夫に叩かれた児は児童相談所に一時保護されたが、名前を言えない"
 
 print("vocab size", len(jtk_a))
 print(jtk_a.tokenize(jp_text))
