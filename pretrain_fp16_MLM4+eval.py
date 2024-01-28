@@ -18,15 +18,13 @@ D:\Edogawa\model_save\protection\token_edo_0319 "vocab_size": 33583　
 と学習後に比較する。
 
 2022年8月9日
-追加の経過記録を追加して作成した
-//EBP-NAS01/edogawa/Keikakiroku/corpus_edogawaAug2021&Jun2022.txt
-（合計291MB、これまでの約倍）で東北大BERTに追加学習
-D:\BERT\Edogawa_BERT\tohoku+edotoken\model0406\checkpoint-32225 0.824
-"vocab_size": 35081
-と比較するために、同じtokenizerを利用。
-
-epoch60に設定　比較のためのepoch20は、手動で取得する必要あり。
+追加の経過記録を追加した、corpus.txt（合計291MB、これまでの約倍）で東北大BERTに追加学習
+epoch60に設定
+比較のためのepoch20は、手動で取得する必要あり。
 save_steps=25から50に変更（ハードディスク利用率が高すぎるため）
+
+pretain@owner2@deep2
+
 """
 
 
@@ -37,16 +35,16 @@ from apex import amp,optimizers
 import warnings
 warnings.simplefilter('ignore')
 
-drive_dir='D:/BERT/Edogawa_BERT/tohoku+edogawaAug2021+edogawaJun2022/'
+drive_dir='D:/BERT/Edogawa_BERT/tohoku+edogawa2022-2023_long_text/'
 # drive_dir='D:/BERT/Edogawa_BERT/tohoku+edotoken+negative/'
-corpus_dir='//EBP-NAS01/edogawa/Keikakiroku/corpus_edogawaAug2021&Jun2022.txt'
+corpus_dir='//EBP-NAS01/edogawa/Keikakiroku/corpus_2022_Oct&2023_Aug_主訴と内容.txt'
 # corpus_dir='D:/BERT/Edogawa_BERT/keikakiroku/corpus0319/corpus_with_blankline.txt' 
 
 
 
 from transformers import AutoTokenizer, AutoModelForMaskedLM, AlbertTokenizer,BertJapaneseTokenizer
-tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token_edo_0331")
-# 上は"vocab_size": 35080
+tokenizer = BertJapaneseTokenizer.from_pretrained("//EBP-NAS01/edogawa/Keikakiroku/tokenizer20240127/")
+# tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token_edo_0408/")
 # tokenizer = BertJapaneseTokenizer.from_pretrained("D:/Edogawa/model_save/protection/token")
 # tokenizer = AutoTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
 
@@ -54,7 +52,7 @@ model = AutoModelForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole
 # リスタートの場合もここにモデルパスを渡す
 # model = AutoModelForMaskedLM.from_pretrained("D:/Edogawa/Edogawa_BERT/tohoku&edogawa0327/checkpoint-166500")
 
-text = "内夫に叩かれた本児は児童相談所に一時保護されたが、名前を言うことができない。ライフラインは止められている。"
+text = "内夫に叩かれた本児は児童相談所に一時保護されたが、名前を言うことができない。"
 print(tokenizer.tokenize(text))
                          
 from transformers import BertConfig
@@ -104,11 +102,11 @@ dataset = LineByLineTextDataset(
 )
 
 #評価用データ追加 
-dataset_eva = LineByLineTextDataset(
-     tokenizer=tokenizer,
-     file_path=drive_dir + 'eval_data/eval_parerent_train.csv',
-     block_size=256, # tokenizerのmax_length
-)
+# dataset_eva = LineByLineTextDataset(
+#      tokenizer=tokenizer,
+#      file_path=drive_dir + 'eval_data/eval_parerent_train.csv',
+#      block_size=256, # tokenizerのmax_length
+# )
 # 以上
 
 from transformers import DataCollatorForLanguageModeling
@@ -131,11 +129,11 @@ torch.backends.cuda.matmul.allow_tf32 = True
 training_args = TrainingArguments(
     output_dir= drive_dir,
     overwrite_output_dir=True,
-    num_train_epochs=60,
+    num_train_epochs=100,
     # num_train_epochs=20,
-    per_device_train_batch_size=64,
+    per_device_train_batch_size=128,
     # per_device_train_batch_size=16,
-    save_steps=100,
+    save_steps=200,
     save_total_limit=500,
     prediction_loss_only=False,
     fp16=True,
@@ -144,7 +142,7 @@ training_args = TrainingArguments(
     disable_tqdm=False,
     # dataloader_num_workers = 8 ,
     logging_dir= drive_dir + 'logs/',
-    logging_steps=25,
+    logging_steps=100,
     # eval_steps=100,
     # evaluation_strategy='steps',#評価用に必要  'steps'
     # save_strategy='steps',#評価用に必要
@@ -175,5 +173,4 @@ trainer = Trainer(
 
 trainer.train() 
 trainer.save_model(drive_dir)
-
-tokenizer.save_pretrained(drive_dir+'tokenizer/')
+# tokenizer.save_pretrained('D:/Edogawa/Edogawa_BERT/tohoku+edotoken/tokenizer/')
